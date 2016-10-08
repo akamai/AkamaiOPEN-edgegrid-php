@@ -142,27 +142,27 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($reflection->invoke($authentication));
     }
 
-    public function testSetHost()
+    public function testGetSetHost()
     {
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
         $authentication->setHost("example.org");
         $this->assertEquals(
             "example.org",
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
 
-        $this->assertNull(\PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayNotHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertNull($authentication->getPath());
+        $this->assertArrayNotHasKey('query', $authentication->getConfig());
 
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
         $authentication->setHost("http://example.com");
         $this->assertEquals(
             "example.com",
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
 
-        $this->assertNull(\PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayNotHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertNull($authentication->getPath());
+        $this->assertArrayNotHasKey('query', $authentication->getConfig());
     }
 
     public function testSetHostWithPath()
@@ -172,18 +172,18 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->setHost("example.net/path");
         $this->assertEquals(
             "example.net",
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
-        $this->assertEquals('/path', \PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayNotHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals('/path', $authentication->getPath());
+        $this->assertArrayNotHasKey('query', $authentication->getConfig());
 
         $authentication->setHost("http://example.org/newpath");
         $this->assertEquals(
             "example.org",
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
-        $this->assertEquals('/newpath', \PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayNotHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals('/newpath', $authentication->getPath());
+        $this->assertArrayNotHasKey('query', $authentication->getConfig());
     }
 
     public function testSetHostWithQuery()
@@ -193,10 +193,10 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->setHost("example.net/path?query=string");
         $this->assertEquals(
             "example.net",
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
-        $this->assertEquals('/path', \PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals('/path', $authentication->getPath());
+        $this->assertArrayHasKey('query', $authentication->getConfig());
         $this->assertEquals(
             'query=string',
             $authentication->getQuery()
@@ -205,10 +205,10 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->setHost("http://example.org/newpath?query=newstring");
         $this->assertEquals(
             "example.org",
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
-        $this->assertEquals('/newpath', \PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals('/newpath', $authentication->getPath());
+        $this->assertArrayHasKey('query', $authentication->getConfig());
         $this->assertEquals(
             'query=newstring',
             $authentication->getQuery()
@@ -217,10 +217,10 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->setHost("http://example.org?query=newstring");
         $this->assertEquals(
             "example.org",
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
-        $this->assertEquals('/', \PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals('/', $authentication->getPath());
+        $this->assertArrayHasKey('query', $authentication->getConfig());
         $this->assertEquals(
             'query=newstring',
             $authentication->getQuery()
@@ -229,45 +229,45 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->setHost("http://example.net/?query=string");
         $this->assertEquals(
             "example.net",
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
-        $this->assertEquals('/', \PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals('/', $authentication->getPath());
+        $this->assertArrayHasKey('query', $authentication->getConfig());
         $this->assertEquals(
             'query=string',
             $authentication->getQuery()
         );
     }
 
-    public function testSetPath()
+    public function testGetSetPath()
     {
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
 
         $authentication->setPath("/path");
         $this->assertEmpty(
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
-        $this->assertEquals('/path', \PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayNotHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals('/path', $authentication->getPath());
+        $this->assertArrayNotHasKey('query', $authentication->getConfig());
         $this->assertEmpty($authentication->getQuery());
 
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
         $authentication->setPath("https://example.net/path");
         $this->assertEquals(
             "example.net",
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
-        $this->assertEquals('/path', \PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayNotHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals('/path', $authentication->getPath());
+        $this->assertArrayNotHasKey('query', $authentication->getConfig());
         $this->assertEmpty($authentication->getQuery());
 
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
         $authentication->setPath("/newpath?query=string");
         $this->assertEmpty(
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
-        $this->assertEquals('/newpath', \PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals('/newpath', $authentication->getPath());
+        $this->assertArrayHasKey('query', $authentication->getConfig());
         $this->assertEquals(
             'query=string',
             $authentication->getQuery()
@@ -278,10 +278,10 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->setPath("https://example.net/path?query=newstring");
         $this->assertEquals(
             "example.net",
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
-        $this->assertEquals('/path', \PHPUnit_Framework_Assert::readAttribute($authentication, 'path'));
-        $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals('/path', $authentication->getPath());
+        $this->assertArrayHasKey('query', $authentication->getConfig());
         $this->assertEquals(
             'query=newstring',
             $authentication->getQuery()
@@ -308,7 +308,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
         $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
     }
@@ -388,7 +388,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
         $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
     }
@@ -409,7 +409,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'host')
+            $authentication->getHost()
         );
         $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
     }
@@ -421,17 +421,17 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $config = array('test' => 'value');
         $authentication->setConfig($config);
 
-        $this->assertEquals($config, \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals($config, $authentication->getConfig());
 
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
         $authentication->setQuery('query=string');
         $authentication->setConfig($config);
 
         $config['query'] = 'query=string';
-        $this->assertEquals($config, \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
+        $this->assertEquals($config, $authentication->getConfig());
     }
 
-    public function testSetQuery()
+    public function testGetSetQuery()
     {
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
         $authentication->setQuery('query=string');
@@ -449,6 +449,67 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
         $authentication->setQuery('query=string+with+spaces');
         $this->assertEquals('query=string%20with%20spaces', $authentication->getQuery());
+    }
+
+    public function testGetSetHttpMethod()
+    {
+        $authentication = new \Akamai\Open\EdgeGrid\Authentication();
+        $authentication->setHttpMethod('GET');
+        $this->assertEquals('GET', $authentication->getHttpMethod());
+
+        $authentication->setHttpMethod('get');
+        $this->assertEquals('GET', $authentication->getHttpMethod());
+
+        $authentication->setHttpMethod('POST');
+        $this->assertEquals('POST', $authentication->getHttpMethod());
+    }
+
+    public function testGetSetConfig()
+    {
+        $config = array('test' => 'value');
+
+        $authentication = new \Akamai\Open\EdgeGrid\Authentication();
+        $authentication->setConfig($config);
+        $this->assertEquals($config, $authentication->getConfig());
+    }
+
+    public function testGetSetConfigMerge()
+    {
+        $config = array('test' => 'value');
+
+        $authentication = new \Akamai\Open\EdgeGrid\Authentication();
+        $authentication->setConfig($config);
+        $authentication->setConfig(array('test2' => 'value2'));
+        $this->assertEquals(array(
+            'test' => 'value',
+            'test2' => 'value2'
+        ), $authentication->getConfig());
+    }
+
+    public function testGetSetBody()
+    {
+        $authentication = new \Akamai\Open\EdgeGrid\Authentication();
+        $authentication->setBody('testing');
+        $this->assertEquals('testing', $authentication->getBody());
+    }
+
+    public function testGetSetBodyTruncate()
+    {
+        $authentication = new \Akamai\Open\EdgeGrid\Authentication();
+        $authentication->setMaxBodySize(4);
+        $authentication->setBody('testing');
+        $this->assertEquals('test', $authentication->getBody(true));
+    }
+
+    public function testGetSetHeaders()
+    {
+        $headers = array(
+            'X-Test-Header' => 'value'
+        );
+
+        $authentication = new \Akamai\Open\EdgeGrid\Authentication();
+        $authentication->setHeaders($headers);
+        $this->assertEquals($headers, $authentication->getHeaders());
     }
 
     public function createFromEdgeRcProvider()

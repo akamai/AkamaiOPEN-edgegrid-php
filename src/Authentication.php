@@ -109,7 +109,7 @@ class Authentication
      */
     public function setHttpMethod($method)
     {
-        $this->httpMethod = $method;
+        $this->httpMethod = strtoupper($method);
         return $this;
     }
 
@@ -242,9 +242,14 @@ class Authentication
      *
      * @return string
      */
-    public function getBody()
+    public function getBody($truncate = false)
     {
-        return isset($this->config['body']) ? $this->config['body'] : '';
+        if (!$truncate) {
+            return isset($this->config['body']) ? $this->config['body'] : '';
+        }
+
+        return isset($this->config['body']) ? substr($this->config['body'], 0, $this->max_body_size) : '';
+
     }
 
     /**
@@ -266,7 +271,7 @@ class Authentication
      */
     public function getHeaders()
     {
-        return isset($this->config['header']) ? $this->config['header'] : array();
+        return isset($this->config['headers']) ? $this->config['headers'] : array();
     }
 
     /**
@@ -488,7 +493,7 @@ class Authentication
             return '';
         } else {
             // Just substr, it'll return as much as it can
-            return $this->makeBase64Sha256(substr($this->config['body'], 0, $this->max_body_size));
+            return $this->makeBase64Sha256($this->getBody(true));
         }
     }
 
