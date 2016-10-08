@@ -206,7 +206,7 @@ class Authentication
         if (is_string($query) && $ensure_encoding) {
             $query_args = array();
             parse_str($query, $query_args);
-            $query = http_build_query($query_args, null, '&', PHP_QUERY_RFC3986);
+            $query = $this->buildQueryString($query_args);
         }
         $this->config['query'] = $query;
         return $this;
@@ -266,7 +266,7 @@ class Authentication
      */
     public function getHeaders()
     {
-        return isset($this->config['header']) ? $this->config['header'] : [];
+        return isset($this->config['header']) ? $this->config['header'] : array();
     }
 
     /**
@@ -417,10 +417,13 @@ class Authentication
         $canonical = array();
         $headers = array();
         if (isset($this->config['headers'])) {
-            $headers = array_combine(
-                array_map('strtolower', array_keys($this->config['headers'])),
-                array_values($this->config['headers'])
-            );
+            $headers = array_map('strtolower', array_keys($this->config['headers']));
+            if (sizeof($this->config['headers']) > 0) {
+                $headers = array_combine(
+                    $headers,
+                    array_values($this->config['headers'])
+                );
+            }
         }
 
         foreach ($this->headers_to_sign as $key) {
@@ -503,7 +506,7 @@ class Authentication
             if (is_string($this->config['query'])) {
                 $query .= $this->config['query'];
             } else {
-                $query .= http_build_query($this->config['query'], null, '&', PHP_QUERY_RFC3986);
+                $query .= $this->buildQueryString($this->config['query']);
             }
         }
 
@@ -578,5 +581,18 @@ class Authentication
         $ini = parse_ini_string($ini, true, INI_SCANNER_RAW);
 
         return $ini;
+    }
+
+    /**
+     * @param $query
+     *
+     * @return string
+     */
+    protected function buildQueryString($query) {
+        if ( defined( 'PHP_QUERY_RFC3986' ) ) {
+            return http_build_query( $query, null, '&', PHP_QUERY_RFC3986 );
+        }
+
+        return str_replace( '+', '%20', http_build_query($query, null, '&' ) );
     }
 }

@@ -43,10 +43,10 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     ) {
         $this->setName($name);
 
-        $mockTimestamp = $this->prophesize(\Akamai\Open\EdgeGrid\Authentication\Timestamp::CLASS);
+        $mockTimestamp = $this->prophesize('\Akamai\Open\EdgeGrid\Authentication\Timestamp');
         $mockTimestamp->__toString()->willReturn($timestamp);
         $mockTimestamp->isValid()->willReturn(true);
-        $mockNonce = $this->prophesize(\Akamai\Open\EdgeGrid\Authentication\Nonce::CLASS);
+        $mockNonce = $this->prophesize('\Akamai\Open\EdgeGrid\Authentication\Nonce');
         $mockNonce->__toString()->willReturn($nonce);
 
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
@@ -77,7 +77,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->createAuthHeader();
 
         $this->assertInstanceOf(
-            \Akamai\Open\EdgeGrid\Authentication\Timestamp::CLASS,
+            '\Akamai\Open\EdgeGrid\Authentication\Timestamp',
             \PHPUnit_Framework_Assert::readAttribute($authentication, 'timestamp')
         );
     }
@@ -93,7 +93,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->setNonce();
 
         $this->assertInstanceOf(
-            \Akamai\Open\EdgeGrid\Authentication\Nonce::CLASS,
+            '\Akamai\Open\EdgeGrid\Authentication\Nonce',
             \PHPUnit_Framework_Assert::readAttribute($authentication, 'nonce')
         );
     }
@@ -119,29 +119,27 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
     public function testSignHeadersArray()
     {
-        $closure = function () {
-
-            return $this->canonicalizeHeaders();
-        };
-
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
+
+        $reflection = new \ReflectionMethod($authentication, 'canonicalizeHeaders');
+        $reflection->setAccessible(true);
+
         $authentication->setAuth("test", "test", "test");
         $authentication->setHttpMethod("GET");
         $authentication->setPath("/test");
         $authentication->setHost("https://example.org");
-        $authentication->setHeaders([
-            'X-Test-1' => ["Value1", "value2"]
-        ]);
+        $authentication->setHeaders(array(
+            'X-Test-1' => array("Value1", "value2")
+        ));
+        $authentication->setHeadersToSign(array('X-Test-1'));
 
-        $authentication->setHeadersToSign(['X-Test-1']);
-        $tester = $closure->bindTo($authentication, $authentication);
-        $this->assertEquals("x-test-1:Value1", $tester());
+        $this->assertEquals("x-test-1:Value1", $reflection->invoke($authentication));
 
-        $authentication->setHeaders([
-            'X-Test-1' => []
-        ]);
-        $authentication->setHeadersToSign(['X-Test-1']);
-        $this->assertEmpty($tester());
+        $authentication->setHeaders(array(
+            'X-Test-1' => array()
+        ));
+        $authentication->setHeadersToSign(array('X-Test-1'));
+        $this->assertEmpty($reflection->invoke($authentication));
     }
 
     public function testSetHost()
@@ -201,7 +199,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
         $this->assertEquals(
             'query=string',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'config')['query']
+            $authentication->getQuery()
         );
 
         $authentication->setHost("http://example.org/newpath?query=newstring");
@@ -213,7 +211,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
         $this->assertEquals(
             'query=newstring',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'config')['query']
+            $authentication->getQuery()
         );
 
         $authentication->setHost("http://example.org?query=newstring");
@@ -225,7 +223,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
         $this->assertEquals(
             'query=newstring',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'config')['query']
+            $authentication->getQuery()
         );
 
         $authentication->setHost("http://example.net/?query=string");
@@ -237,7 +235,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
         $this->assertEquals(
             'query=string',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'config')['query']
+            $authentication->getQuery()
         );
     }
 
@@ -272,7 +270,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
         $this->assertEquals(
             'query=string',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'config')['query']
+            $authentication->getQuery()
         );
         $this->assertEquals('query=string', $authentication->getQuery());
 
@@ -286,7 +284,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('query', \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
         $this->assertEquals(
             'query=newstring',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'config')['query']
+            $authentication->getQuery()
         );
         $this->assertEquals('query=newstring', $authentication->getQuery());
     }
@@ -299,13 +297,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $_SERVER['HOME'] = __DIR__ . '/edgerc';
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile($section, $file);
 
-        $this->assertInstanceOf(\Akamai\Open\EdgeGrid\Authentication::CLASS, $authentication);
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
-            [
+            array(
                 'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
                 'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
                 'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
-            ],
+            ),
             \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
         );
         $this->assertEquals(
@@ -330,11 +328,16 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
         try {
             $auth = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile();
-            $this->assertInstanceOf(\Akamai\Open\EdgeGrid\Authentication::CLASS, $auth);
-        } finally {
+            $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $auth);
+        } catch (\Exception $e) {
             if ($unlink) {
                 unlink('./.edgerc');
             }
+            throw $e;
+        }
+
+        if ($unlink) {
+            unlink('./.edgerc');
         }
     }
 
@@ -359,10 +362,14 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
         try {
             $auth = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile(null, $filename);
-        } finally {
+        } catch (\Exception $e) {
             chmod($filename, 0777);
             unlink($filename);
+            throw $e;
         }
+
+        chmod($filename, 0777);
+        unlink($filename);
     }
 
     public function testCreateFromEdgeRcColons()
@@ -370,13 +377,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $file = __DIR__ . '/edgerc/.edgerc.invalid';
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile(null, $file);
 
-        $this->assertInstanceOf(\Akamai\Open\EdgeGrid\Authentication::CLASS, $authentication);
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
-            [
+            array(
                 'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
                 'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
                 'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
-            ],
+            ),
             \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
         );
         $this->assertEquals(
@@ -391,13 +398,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $file = __DIR__ . '/edgerc/.edgerc.invalid-spaces';
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile(null, $file);
 
-        $this->assertInstanceOf(\Akamai\Open\EdgeGrid\Authentication::CLASS, $authentication);
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
-            [
+            array(
                 'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
                 'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
                 'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
-            ],
+            ),
             \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
         );
         $this->assertEquals(
@@ -411,7 +418,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     {
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
 
-        $config = ['test' => 'value'];
+        $config = array('test' => 'value');
         $authentication->setConfig($config);
 
         $this->assertEquals($config, \PHPUnit_Framework_Assert::readAttribute($authentication, 'config'));
@@ -430,7 +437,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->setQuery('query=string');
         $this->assertEquals('query=string', $authentication->getQuery());
 
-        $authentication->setQuery(['query' => 'string']);
+        $authentication->setQuery(array('query' => 'string'));
         $authentication->getQuery('query=string', $authentication->getQuery());
     }
 
@@ -446,54 +453,54 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
     public function createFromEdgeRcProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 'section' => null,
                 'file' => null,
-            ],
-            [
+            ),
+            array(
                 'section' => 'default',
                 'file' => null,
-            ],
-            [
+            ),
+            array(
                 'section' => 'testing',
                 'file' => __DIR__ . '/edgerc/.edgerc.testing',
-            ],
-            [
+            ),
+            array(
                 'section' => 'testing',
                 'file' => __DIR__ . '/edgerc/.edgerc.default-testing',
-            ]
-        ];
+            )
+        );
     }
 
     public function createAuthHeaderDataProvider()
     {
         $testdata = json_decode(file_get_contents(__DIR__ . '/testdata.json'), true);
 
-        $defaults = [
-            'auth' => [
+        $defaults = array(
+            'auth' => array(
                 'client_token' => $testdata['client_token'],
                 'client_secret' => $testdata['client_secret'],
                 'access_token' => $testdata['access_token'],
-            ],
+            ),
             'host' => parse_url($testdata['base_url'], PHP_URL_HOST),
             'headersToSign' => $testdata['headers_to_sign'],
             'nonce' => $testdata['nonce'],
             'timestamp' => $testdata['timestamp'],
             'maxBody' => $testdata['max_body'],
-        ];
+        );
 
-        foreach ($testdata['tests'] as $test) {
-            $data = array_merge($defaults, [
+        foreach ($testdata['tests'] as &$test) {
+            $data = array_merge($defaults, array(
                 'method' => $test['request']['method'],
                 'path' => $test['request']['path'],
                 'expected' => $test['expectedAuthorization'],
                 'query' => (isset($test['request']['query'])) ? $test['request']['query'] : null,
                 'body' => (isset($test['request']['data'])) ? $test['request']['data'] : null,
                 'name' => $test['testName'],
-            ]);
+            ));
 
-            $data['headers'] = [];
+            $data['headers'] = array();
             if (isset($test['request']['headers'])) {
                 array_walk_recursive($test['request']['headers'], function ($value, $key) use (&$data) {
                     $data['headers'][$key] = $value;
@@ -502,7 +509,9 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
             ksort($data);
 
-            yield $data;
+            $test = $data;
         }
+
+        return $testdata['tests'];
     }
 }

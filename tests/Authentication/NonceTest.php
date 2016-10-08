@@ -27,7 +27,7 @@ class NonceTest extends \PHPUnit_Framework_TestCase
     {
         $nonce = new \Akamai\Open\EdgeGrid\Authentication\Nonce();
 
-        $nonces = [];
+        $nonces = array();
         for ($i = 0; $i < 100; $i++) {
             $nonces[] = (string) $nonce;
         }
@@ -42,11 +42,6 @@ class NonceTest extends \PHPUnit_Framework_TestCase
         }
 
         $nonce = new \Akamai\Open\EdgeGrid\Authentication\Nonce();
-        $closure = function () {
-            return $this->function;
-        };
-        $tester = $closure->bindTo($nonce, $nonce);
-
-        $this->assertEquals('random_bytes', $tester());
+        $this->assertAttributeEquals('random_bytes', 'function', $nonce);
     }
 }

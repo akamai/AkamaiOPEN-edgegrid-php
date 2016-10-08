@@ -28,8 +28,7 @@ class TimestampTest extends \PHPUnit_Framework_TestCase
     {
         $timestamp = new \Akamai\Open\EdgeGrid\Authentication\Timestamp();
 
-        $check = \DateTimeImmutable::createFromFormat('Ymd\TH:i:sO', (string) $timestamp, new \DateTimeZone('UTC'));
-        $check = $check->setTimezone(new \DateTimeZone('UTC'));
+        $check = \DateTime::createFromFormat('Ymd\TH:i:sO', (string) $timestamp, new \DateTimeZone('UTC'));
         $this->assertEquals($check, \PHPUnit_Framework_Assert::readAttribute($timestamp, 'timestamp'));
     }
 
