@@ -14,7 +14,7 @@ namespace Akamai\Open\EdgeGrid\Authentication;
 /**
  * Generates a random nonce for each request
  *
- * @package Akamai {OPEN} EdgeGrid Auth
+ * @package Akamai\Open\EdgeGrid\Authentication
  */
 class Nonce
 {

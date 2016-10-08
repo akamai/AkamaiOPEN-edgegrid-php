@@ -16,13 +16,13 @@ namespace Akamai\Open\EdgeGrid;
 
 use Akamai\Open\EdgeGrid\Authentication\Nonce;
 use Akamai\Open\EdgeGrid\Authentication\Timestamp;
-use Akamai\Open\EdgeGrid\Exception\ConfigException;
-use Akamai\Open\EdgeGrid\Exception\SignerException\InvalidSignDataException;
+use Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException;
+use Akamai\Open\EdgeGrid\Authentication\Exception\SignerException\InvalidSignDataException;
 
 /**
  * Akamai {OPEN} EdgeGrid Request Signer
  *
- * @package Akamai {OPEN} EdgeGrid Auth
+ * @package \Akamai\Open\EdgeGrid\Authentication
  */
 class Authentication
 {
@@ -114,6 +114,8 @@ class Authentication
     }
 
     /**
+     * Get request HTTP method
+     *
      * @return string
      */
     public function getHttpMethod()
@@ -178,6 +180,8 @@ class Authentication
     }
 
     /**
+     * Get Authentication config array
+     *
      * @return array
      */
     public function getConfig()
@@ -189,9 +193,12 @@ class Authentication
      * Set GET args
      *
      * If setting to a string, you MUST encode using RFC3986
-     * {@see http_build_query()}
+     * {@see http_build_query()}. When passing in a string,
+     * this method will re-encode using RFC3986 unless you
+     * explicitly pass in false as the second argument.
      *
      * @param array|string $query
+     * @param bool $ensure_encoding
      * @return $this
      */
     public function setQuery($query, $ensure_encoding = true)
@@ -206,7 +213,12 @@ class Authentication
     }
 
     /**
-     * @return string
+     * Get request query string
+     *
+     * The return value will match
+     * the type passed in to setQuery().
+     *
+     * @return string|array
      */
     public function getQuery()
     {
@@ -226,6 +238,8 @@ class Authentication
     }
 
     /**
+     * Get request body
+     *
      * @return string
      */
     public function getBody()
@@ -246,6 +260,8 @@ class Authentication
     }
 
     /**
+     * Get request headers
+     *
      * @return array
      */
     public function getHeaders()
@@ -275,6 +291,8 @@ class Authentication
     }
 
     /**
+     * Get request path
+     *
      * @return string
      */
     public function getPath()
@@ -350,6 +368,15 @@ class Authentication
         return $this;
     }
 
+    /**
+     * Create instance using an .edgerc configuration file
+     *
+     * @param string $section
+     * @param string|null $path
+     *
+     * @return static
+     * @throws ConfigException
+     */
     public static function createFromEdgeRcFile($section = "default", $path = null)
     {
         if ($section === null) {
@@ -523,7 +550,7 @@ class Authentication
      *
      * @param $path
      * @return array
-     * @throws \Exception
+     * @throws ConfigException
      */
     protected static function parseEdgeRcFile($path)
     {

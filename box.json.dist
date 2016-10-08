@@ -1,5 +1,5 @@
 {
-  "alias": "akamai-open-edgegrid-client.phar",
+  "alias": "akamai-open-edgegrid-auth.phar",
   "algorithm": "SHA512",
   "directories": [
     "src"
@@ -40,7 +40,7 @@
   ],
   "bootstrap": "build/phar/bootstrap.php",
   "git-version": "package_version",
-  "output": "akamai-open-edgegrid-client.phar",
+  "output": "akamai-open-edgegrid-auth.phar",
   "stub": "build/phar/stub.php",
   "shebang": "#!/usr/bin/env php"
 }

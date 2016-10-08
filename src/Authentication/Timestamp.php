@@ -14,7 +14,7 @@ namespace Akamai\Open\EdgeGrid\Authentication;
 /**
  * Generates an Akamai formatted Date for each request
  *
- * @package Akamai {OPEN} EdgeGrid Auth
+ * @package Akamai\Open\EdgeGrid\Authentication
  */
 class Timestamp
 {

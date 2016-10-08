@@ -24,15 +24,11 @@ if (!file_exists(__DIR__ . '/../build/phar')) {
 \$stub = <<<EOF
 <?php
 if (class_exists('Phar')) {
-   Phar::mapPhar('akamai-open-edgegrid-client.phar');
+   Phar::mapPhar('akamai-open-edgegrid-auth.phar');
 }
 
 Phar::interceptFileFuncs();
 require_once 'phar://' .__FILE__. '/vendor/autoload.php';
-if (PHP_SAPI == 'cli') {
-    (new \\Akamai\\Open\\EdgeGrid\\Cli())->run();
-    exit;
-}
 __HALT_COMPILER(); ?>
 EOF;
 
@@ -40,4 +36,4 @@ file_put_contents('build/phar/stub.php', \$stub);" > build/phar/bootstrap.php
 
 php -dphar.readonly=0 ./vendor/bin/box build
 
-mv akamai-open-edgegrid-client.phar "akamai-open-edgegrid-client${VERSION}.phar"
+mv akamai-open-edgegrid-auth.phar "akamai-open-edgegrid-auth${VERSION}.phar"

@@ -99,7 +99,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Akamai\Open\EdgeGrid\Exception\SignerException\InvalidSignDataException
+     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\SignerException\InvalidSignDataException
      * @expectedExceptionMessage Timestamp is invalid. Too old?
      */
     public function testTimestampTimeout()
@@ -316,7 +316,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Akamai\Open\EdgeGrid\Exception\ConfigException
+     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
      * @expectedExceptionMessage Section "default" does not exist!
      */
     public function testCreateFromEdgeRcUseCwd()
@@ -339,7 +339,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Akamai\Open\EdgeGrid\Exception\ConfigException
+     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
      * @expectedExceptionMessage Path to .edgerc file "/non-existant/.edgerc" does not exist!
      */
     public function testCreateFromEdgeRcNonExistant()
@@ -348,7 +348,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Akamai\Open\EdgeGrid\Exception\ConfigException
+     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
      * @expectedExceptionMessage Unable to read .edgerc file!
      */
     public function testCreateFromEdgeRcNonReadable()
@@ -446,8 +446,24 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
     public function createFromEdgeRcProvider()
     {
-        $clientTest = new \Akamai\Open\EdgeGrid\Tests\ClientTest();
-        return $clientTest->createFromEdgeRcProvider();
+        return [
+            [
+                'section' => null,
+                'file' => null,
+            ],
+            [
+                'section' => 'default',
+                'file' => null,
+            ],
+            [
+                'section' => 'testing',
+                'file' => __DIR__ . '/edgerc/.edgerc.testing',
+            ],
+            [
+                'section' => 'testing',
+                'file' => __DIR__ . '/edgerc/.edgerc.default-testing',
+            ]
+        ];
     }
 
     public function createAuthHeaderDataProvider()
