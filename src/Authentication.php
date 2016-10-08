@@ -588,11 +588,12 @@ class Authentication
      *
      * @return string
      */
-    protected function buildQueryString($query) {
-        if ( defined( 'PHP_QUERY_RFC3986' ) ) {
-            return http_build_query( $query, null, '&', PHP_QUERY_RFC3986 );
+    protected function buildQueryString($query)
+    {
+        if (defined('PHP_QUERY_RFC3986')) {
+            return http_build_query($query, null, '&', PHP_QUERY_RFC3986);
         }
 
-        return str_replace( '+', '%20', http_build_query($query, null, '&' ) );
+        return str_replace('+', '%20', http_build_query($query, null, '&'));
     }
 }
