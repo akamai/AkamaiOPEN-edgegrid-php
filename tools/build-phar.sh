@@ -40,7 +40,8 @@ mv akamai-open-edgegrid-auth.phar "akamai-open-edgegrid-auth${VERSION}.phar"
 
 echo "<?php
 include 'akamai-open-edgegrid-auth${VERSION}.phar';
-\$auth = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile();" > test.php
+\$auth = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile();
+var_dump(\$auth);" > test.php
 echo "Running test.php";
 php test.php
 rm test.php
