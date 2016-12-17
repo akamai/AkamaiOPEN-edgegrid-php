@@ -69,6 +69,6 @@ class Timestamp
      */
     public function __toString()
     {
-        return $this->timestamp->format('Ymd\TH:i:sO');
+        return $this->timestamp->format('Ymd\TH:i:s.uO');
     }
 }
