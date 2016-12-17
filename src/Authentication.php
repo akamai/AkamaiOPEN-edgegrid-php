@@ -249,7 +249,6 @@ class Authentication
         }
 
         return isset($this->config['body']) ? substr($this->config['body'], 0, $this->max_body_size) : '';
-
     }
 
     /**
