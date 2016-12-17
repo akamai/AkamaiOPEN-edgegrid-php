@@ -18,6 +18,8 @@ namespace Akamai\Open\EdgeGrid\Authentication;
  */
 class Timestamp
 {
+    const FORMAT = 'Ymd\TH:i:sO';
+
     /**
      * @var \DateTime Signing Timestamp
      */
@@ -69,6 +71,6 @@ class Timestamp
      */
     public function __toString()
     {
-        return $this->timestamp->format('Ymd\TH:i:s.uO');
+        return $this->timestamp->format(static::FORMAT);
     }
 }
