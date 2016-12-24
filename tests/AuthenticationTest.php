@@ -351,6 +351,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @requires OS ^(?!.*WIN).*$
      * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
      * @expectedExceptionMessage Unable to read .edgerc file!
      */
@@ -412,6 +413,374 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
             $authentication->getHost()
         );
         $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    /**
+     * @backupGlobals enabled
+     */
+    public function testCreateFromEnvNoSection()
+    {
+        $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+        $_ENV['AKAMAI_CLIENT_TOKEN'] = "akab-client-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_CLIENT_SECRET'] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=";
+        $_ENV['AKAMAI_ACCESS_TOKEN'] = "akab-access-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_MAX_SIZE'] = 2048;
+
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv();
+
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
+        $this->assertEquals(
+            array(
+                'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
+                'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
+                'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
+            ),
+            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+        );
+        $this->assertEquals(
+            'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
+            $authentication->getHost()
+        );
+        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    /**
+     * @backupGlobals enabled
+     */
+    public function testCreateFromEnvDefaultSection()
+    {
+        $_ENV['AKAMAI_DEFAULT_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+        $_ENV['AKAMAI_DEFAULT_CLIENT_TOKEN'] = "akab-client-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_DEFAULT_CLIENT_SECRET'] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=";
+        $_ENV['AKAMAI_DEFAULT_ACCESS_TOKEN'] = "akab-access-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_DEFAULT_MAX_SIZE'] = 2048;
+
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv();
+
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
+        $this->assertEquals(
+            array(
+                'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
+                'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
+                'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
+            ),
+            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+        );
+        $this->assertEquals(
+            'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
+            $authentication->getHost()
+        );
+        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    /**
+     * @backupGlobals enabled
+     */
+    public function testCreateFromEnvPreferSection()
+    {
+        $_ENV['AKAMAI_HOST'] = false;
+        $_ENV['AKAMAI_CLIENT_TOKEN'] = false;
+        $_ENV['AKAMAI_CLIENT_SECRET'] = false;
+        $_ENV['AKAMAI_ACCESS_TOKEN'] = false;
+        $_ENV['AKAMAI_MAX_SIZE'] = 0;
+
+        $_ENV['AKAMAI_TESTING_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+        $_ENV['AKAMAI_TESTING_CLIENT_TOKEN'] = "akab-client-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_TESTING_CLIENT_SECRET'] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=";
+        $_ENV['AKAMAI_TESTING_ACCESS_TOKEN'] = "akab-access-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_TESTING_MAX_SIZE'] = 2048;
+
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv("testing");
+
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
+        $this->assertEquals(
+            array(
+                'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
+                'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
+                'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
+            ),
+            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+        );
+        $this->assertEquals(
+            'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
+            $authentication->getHost()
+        );
+        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    /**
+     * @backupGlobals enabled
+     */
+    public function testCreateFromEnvNoMaxSize()
+    {
+        $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+        $_ENV['AKAMAI_CLIENT_TOKEN'] = "akab-client-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_CLIENT_SECRET'] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=";
+        $_ENV['AKAMAI_ACCESS_TOKEN'] = "akab-access-token-xxx-xxxxxxxxxxxxxxxx";
+
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv();
+
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
+        $this->assertEquals(
+            array(
+                'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
+                'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
+                'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
+            ),
+            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+        );
+        $this->assertEquals(
+            'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
+            $authentication->getHost()
+        );
+        $this->assertEquals(131072, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    /**
+     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
+     * @expectedExceptionMessage Environment variables AKAMAI_HOST or AKAMAI_DEFAULT_HOST do not exist
+     */
+    public function testCreateFromEnvInvalid()
+    {
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv();
+    }
+
+    /**
+     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
+     * @expectedExceptionMessage Environment variable AKAMAI_TESTING_HOST does not exist
+     */
+    public function testCreateFromEnvInvalidSection()
+    {
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv("testing");
+    }
+
+    public function testCreateInstancePreferEnv()
+    {
+        $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+        $_ENV['AKAMAI_CLIENT_TOKEN'] = "akab-client-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_CLIENT_SECRET'] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=";
+        $_ENV['AKAMAI_ACCESS_TOKEN'] = "akab-access-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_MAX_SIZE'] = 2048;
+
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance(
+            "default",
+            __DIR__ . "/edgerc/.edgerc.default-testing"
+        );
+
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
+        $this->assertEquals(
+            array(
+                'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
+                'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
+                'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
+            ),
+            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+        );
+        $this->assertEquals(
+            'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
+            $authentication->getHost()
+        );
+        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    public function testCreateInstanceFallbackEdgeRc()
+    {
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance("default", __DIR__ . "/edgerc/.edgerc");
+
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
+        $this->assertEquals(
+            array(
+                'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
+                'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
+                'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
+            ),
+            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+        );
+        $this->assertEquals(
+            'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
+            $authentication->getHost()
+        );
+        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    public function testCreateInstanceSection()
+    {
+        $_ENV['AKAMAI_TESTING_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+        $_ENV['AKAMAI_TESTING_CLIENT_TOKEN'] = "akab-client-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_TESTING_CLIENT_SECRET'] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=";
+        $_ENV['AKAMAI_TESTING_ACCESS_TOKEN'] = "akab-access-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_TESTING_MAX_SIZE'] = 2048;
+
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance("testing", __DIR__ . "/edgerc/.edgerc");
+
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
+        $this->assertEquals(
+            array(
+                'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
+                'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
+                'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
+            ),
+            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+        );
+        $this->assertEquals(
+            'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
+            $authentication->getHost()
+        );
+        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    public function testCreateInstanceSectionFallback()
+    {
+        $_ENV['AKAMAI_HOST'] = false;
+        $_ENV['AKAMAI_CLIENT_TOKEN'] = false;
+        $_ENV['AKAMAI_CLIENT_SECRET'] = false;
+        $_ENV['AKAMAI_ACCESS_TOKEN'] = false;
+        $_ENV['AKAMAI_MAX_SIZE'] = 0;
+
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance(
+            "testing",
+            __DIR__ . "/edgerc/.edgerc.testing"
+        );
+
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
+        $this->assertEquals(
+            array(
+                'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
+                'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
+                'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
+            ),
+            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+        );
+        $this->assertEquals(
+            'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
+            $authentication->getHost()
+        );
+        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    public function testCreateInstanceSectionFallbackEnv()
+    {
+        $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+        $_ENV['AKAMAI_CLIENT_TOKEN'] = "akab-client-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_CLIENT_SECRET'] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=";
+        $_ENV['AKAMAI_ACCESS_TOKEN'] = "akab-access-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_MAX_SIZE'] = 2048;
+
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance("testing", __DIR__ . "/edgerc/.edgerc");
+
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
+        $this->assertEquals(
+            array(
+                'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
+                'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
+                'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
+            ),
+            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+        );
+        $this->assertEquals(
+            'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
+            $authentication->getHost()
+        );
+        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    public function testCreateInstanceSectionFallbackInvalidEdgerc()
+    {
+        $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+        $_ENV['AKAMAI_CLIENT_TOKEN'] = "akab-client-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_CLIENT_SECRET'] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=";
+        $_ENV['AKAMAI_ACCESS_TOKEN'] = "akab-access-token-xxx-xxxxxxxxxxxxxxxx";
+        $_ENV['AKAMAI_MAX_SIZE'] = 2048;
+
+        $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance(
+            "testing",
+            __DIR__ . "/edgerc/.edgerc.invalid"
+        );
+
+        $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
+        $this->assertEquals(
+            array(
+                'client_token' => "akab-client-token-xxx-xxxxxxxxxxxxxxxx",
+                'client_secret' => "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
+                'access_token' => "akab-access-token-xxx-xxxxxxxxxxxxxxxx"
+            ),
+            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+        );
+        $this->assertEquals(
+            'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
+            $authentication->getHost()
+        );
+        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+    }
+
+    /**
+     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
+     * @expectedExceptionMessage Unable to create instance using environment or .edgerc file
+     */
+    public function testCreateInstanceSectionFallbackInvalidEdgercNoEnv()
+    {
+        try {
+            $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance(
+                "testing",
+                __DIR__ . "/edgerc/.edgerc.invalid"
+            );
+        } catch (\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException $e) {
+            $this->assertInstanceOf(
+                '\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException',
+                $e->getPrevious()
+            );
+
+            $this->assertEquals("Section \"testing\" does not exist!", $e->getPrevious()->getMessage());
+
+            throw $e;
+        }
+    }
+
+    /**
+     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
+     * @expectedExceptionMessage Unable to create instance using environment or .edgerc file
+     */
+    public function testCreateInstanceInvalidEdgercInvalidEnv()
+    {
+        $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+
+        try {
+            $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance();
+        } catch (\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException $e) {
+            $this->assertInstanceOf(
+                '\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException',
+                $e->getPrevious()
+            );
+
+            $this->assertEquals('Path to .edgerc file "" does not exist!', $e->getPrevious()->getMessage());
+
+            throw $e;
+        }
+    }
+
+    /**
+     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
+     * @expectedExceptionMessage Unable to create instance using environment or .edgerc file
+     */
+    public function testCreateInstanceInvalidEdgercInvalidEnvSection()
+    {
+        $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+
+        try {
+            $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance("testing");
+        } catch (\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException $e) {
+            $this->assertInstanceOf(
+                '\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException',
+                $e->getPrevious()
+            );
+
+            $this->assertEquals(
+                "Environment variables AKAMAI_CLIENT_TOKEN or AKAMAI_DEFAULT_CLIENT_TOKEN do not exist",
+                $e->getPrevious()->getMessage()
+            );
+
+            throw $e;
+        }
     }
 
     public function testSetConfig()

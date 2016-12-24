@@ -373,12 +373,98 @@ class Authentication
     }
 
     /**
+     * Create instance using environment (prefered) or .edgerc file (fallback)
+     * automatically.
+     *
+     * This method will check in order:
+     * - AKAMAI_{SECTION}_* environment variables
+     * - if using the "default" section, AKAMAI_* environment variables
+     * - the specified (or "default" if none) section in .edgerc
+     * - if not using the "default" section, AKAMAI_* environment variables
+     *
+     * @param string $section
+     * @param null $path
+     * @return Authentication
+     * @throws ConfigException
+     */
+    public static function createInstance($section = "default", $path = null)
+    {
+        $previousError = null;
+
+        if (isset($_ENV['AKAMAI_' .strtoupper($section). '_HOST'])
+            || ($section == 'default' && isset($_ENV['AKAMAI_HOST']))) {
+            try {
+                return self::createFromEnv($section);
+            } catch (ConfigException $previousError) {
+            }
+        }
+
+        try {
+            return self::createFromEdgeRcFile($section, $path);
+        } catch (ConfigException $previousError) {
+            try {
+                if ($section != 'default' && isset($_ENV['AKAMAI_HOST'])) {
+                    return self::createFromEnv();
+                }
+            } catch (ConfigException $previousError) {
+                // fall through to the below throw
+            }
+        }
+
+        throw new ConfigException("Unable to create instance using environment or .edgerc file", 0, $previousError);
+    }
+
+    /**
+     * Create instance using environment variables
+     *
+     * @param string $section
+     * @return Authentication
+     * @throws ConfigException
+     */
+    public static function createFromEnv($section = "default")
+    {
+        $section = strtoupper($section);
+
+        $prefix = (isset($_ENV['AKAMAI_' . $section . '_HOST'])) ? 'AKAMAI_' . $section . '_' : 'AKAMAI_';
+
+        $vars = array('HOST', 'CLIENT_TOKEN', 'CLIENT_SECRET', 'ACCESS_TOKEN');
+
+        foreach ($vars as $var) {
+            if (!isset($_ENV[$prefix . $var])) {
+                throw new ConfigException(sprintf(
+                    'Environment variable%s %sAKAMAI_%s_%s do%s not exist',
+                    $section == 'DEFAULT' ? 's' : '',
+                    $section == 'DEFAULT' ? 'AKAMAI_' . $var . ' or ' : '',
+                    $section,
+                    $var,
+                    $section == 'DEFAULT' ? '' : 'es'
+                ));
+            }
+        }
+
+        $auth = new static();
+        $auth->setAuth(
+            $_ENV[$prefix . 'CLIENT_TOKEN'],
+            $_ENV[$prefix . 'CLIENT_SECRET'],
+            $_ENV[$prefix . 'ACCESS_TOKEN']
+        );
+
+        $auth->setHost($_ENV[$prefix . 'HOST']);
+
+        if (isset($_ENV[$prefix . 'MAX_SIZE'])) {
+            $auth->setMaxBodySize($_ENV[$prefix . 'MAX_SIZE']);
+        }
+
+        return $auth;
+    }
+
+    /**
      * Create instance using an .edgerc configuration file
      *
      * @param string $section
      * @param string|null $path
      *
-     * @return static
+     * @return Authentication
      * @throws ConfigException
      */
     public static function createFromEdgeRcFile($section = "default", $path = null)
@@ -598,6 +684,8 @@ class Authentication
             return http_build_query($query, null, '&', PHP_QUERY_RFC3986);
         }
 
+        // @codeCoverageIgnoreStart
         return str_replace('+', '%20', http_build_query($query, null, '&'));
+        // @codeCoverageIgnoreEnd
     }
 }
