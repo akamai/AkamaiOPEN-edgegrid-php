@@ -1,3 +1,9 @@
+0.6.2
+---
+[24 Dec, 2016]
+* Add support for using environment variables for credentials 
+* General cleanup
+
 0.6.1
 ---
 [17 Dec, 2016]
