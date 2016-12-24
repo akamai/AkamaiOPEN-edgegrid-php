@@ -8,8 +8,21 @@
   "files": [
     "LICENSE",
     "README.md",
-    "CHANGELOG.md",
-    "vendor/autoload.php"
+    "CHANGELOG.md"
+  ],
+  "finder": [
+    {
+      "name": "*.php",
+      "exclude": [
+        "bin",
+        "docs",
+        "examples",
+        "Tests",
+        "tests",
+        "tools"
+      ],
+      "in": "vendor"
+    }
   ],
   "compression": "BZ2",
   "bootstrap": "build/phar/bootstrap.php",
