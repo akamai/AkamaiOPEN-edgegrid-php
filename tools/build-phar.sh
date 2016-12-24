@@ -34,7 +34,7 @@ EOF;
 
 file_put_contents('build/phar/stub.php', \$stub);" > build/phar/bootstrap.php
 
-php -dphar.readonly=0 ./vendor/bin/box build
+php -dphar.readonly=0 $HOME/.composer/vendor/bin/box build
 
 mv akamai-open-edgegrid-auth.phar "akamai-open-edgegrid-auth${VERSION}.phar"
 
