@@ -70,8 +70,8 @@ class Authentication
 
     /**
      * Create the Authentication header
-     *
      * @return string
+     * @throws \Akamai\Open\EdgeGrid\Authentication\Exception\SignerException\InvalidSignDataException
      * @link https://developer.akamai.com/introduction/Client_Auth.html
      */
     public function createAuthHeader()
@@ -81,7 +81,7 @@ class Authentication
         }
 
         if (!$this->timestamp->isValid()) {
-            throw new InvalidSignDataException("Timestamp is invalid. Too old?");
+            throw new InvalidSignDataException('Timestamp is invalid. Too old?');
         }
 
         if ($this->nonce === null) {
@@ -226,7 +226,7 @@ class Authentication
      * Set request body
      *
      * @param string $body
-     * return $this;
+     * @return $this
      */
     public function setBody($body)
     {
@@ -237,6 +237,7 @@ class Authentication
     /**
      * Get request body
      *
+     * @param bool $truncate
      * @return string
      */
     public function getBody($truncate = false)
@@ -384,12 +385,12 @@ class Authentication
      * @return Authentication
      * @throws ConfigException
      */
-    public static function createInstance($section = "default", $path = null)
+    public static function createInstance($section = 'default', $path = null)
     {
         $previousError = null;
 
         if (isset($_ENV['AKAMAI_' .strtoupper($section). '_HOST'])
-            || ($section == 'default' && isset($_ENV['AKAMAI_HOST']))) {
+            || (isset($_ENV['AKAMAI_HOST']) && $section === 'default')) {
             try {
                 return self::createFromEnv($section);
             } catch (ConfigException $previousError) {
@@ -400,7 +401,7 @@ class Authentication
             return self::createFromEdgeRcFile($section, $path);
         } catch (ConfigException $previousError) {
             try {
-                if ($section != 'default' && isset($_ENV['AKAMAI_HOST'])) {
+                if (isset($_ENV['AKAMAI_HOST']) && $section !== 'default') {
                     return self::createFromEnv();
                 }
             } catch (ConfigException $previousError) {
@@ -408,7 +409,7 @@ class Authentication
             }
         }
 
-        throw new ConfigException("Unable to create instance using environment or .edgerc file", 0, $previousError);
+        throw new ConfigException('Unable to create instance using environment or .edgerc file', 0, $previousError);
     }
 
     /**
@@ -418,11 +419,11 @@ class Authentication
      * @return Authentication
      * @throws ConfigException
      */
-    public static function createFromEnv($section = "default")
+    public static function createFromEnv($section = 'default')
     {
         $section = strtoupper($section);
 
-        $prefix = (isset($_ENV['AKAMAI_' . $section . '_HOST'])) ? 'AKAMAI_' . $section . '_' : 'AKAMAI_';
+        $prefix = isset($_ENV['AKAMAI_' . $section . '_HOST']) ? 'AKAMAI_' . $section . '_' : 'AKAMAI_';
 
         $vars = array('HOST', 'CLIENT_TOKEN', 'CLIENT_SECRET', 'ACCESS_TOKEN');
 
@@ -430,11 +431,11 @@ class Authentication
             if (!isset($_ENV[$prefix . $var])) {
                 throw new ConfigException(sprintf(
                     'Environment variable%s %sAKAMAI_%s_%s do%s not exist',
-                    $section == 'DEFAULT' ? 's' : '',
-                    $section == 'DEFAULT' ? 'AKAMAI_' . $var . ' or ' : '',
+                    $section === 'DEFAULT' ? 's' : '',
+                    $section === 'DEFAULT' ? 'AKAMAI_' . $var . ' or ' : '',
                     $section,
                     $var,
-                    $section == 'DEFAULT' ? '' : 'es'
+                    $section === 'DEFAULT' ? '' : 'es'
                 ));
             }
         }
@@ -464,7 +465,7 @@ class Authentication
      * @return Authentication
      * @throws ConfigException
      */
-    public static function createFromEdgeRcFile($section = "default", $path = null)
+    public static function createFromEdgeRcFile($section = 'default', $path = null)
     {
         if ($section === null) {
             $section = 'default';
@@ -505,7 +506,7 @@ class Authentication
         $headers = array();
         if (isset($this->config['headers'])) {
             $headers = array_map('strtolower', array_keys($this->config['headers']));
-            if (sizeof($this->config['headers']) > 0) {
+            if (count($this->config['headers']) > 0) {
                 $headers = array_combine(
                     $headers,
                     array_values($this->config['headers'])
@@ -516,9 +517,9 @@ class Authentication
         foreach ($this->headers_to_sign as $key) {
             $key = strtolower($key);
             if (isset($headers[$key])) {
-                if (is_array($headers[$key]) && sizeof($headers[$key]) >= 1) {
+                if (is_array($headers[$key]) && count($headers[$key]) >= 1) {
                     $value = trim($headers[$key][0]);
-                } elseif (is_array($headers[$key]) && sizeof($headers[$key]) == 0) {
+                } elseif (is_array($headers[$key]) && count($headers[$key]) === 0) {
                     continue;
                 } else {
                     $value = trim($headers[$key]);
@@ -548,8 +549,7 @@ class Authentication
      */
     protected function makeBase64HmacSha256($data, $key)
     {
-        $hash = base64_encode(hash_hmac('sha256', (string) $data, $key, true));
-        return $hash;
+        return base64_encode(hash_hmac('sha256', (string) $data, $key, true));
     }
 
     /**
@@ -560,8 +560,7 @@ class Authentication
      */
     protected function makeBase64Sha256($data)
     {
-        $hash = base64_encode(hash('sha256', (string) $data, true));
-        return $hash;
+        return base64_encode(hash('sha256', (string) $data, true));
     }
 
     /**
@@ -603,7 +602,7 @@ class Authentication
             $this->host,
             $this->path . $query,
             $this->canonicalizeHeaders(),
-            (strtoupper($this->httpMethod) == 'POST') ? $this->makeContentHash() : '',
+            (strtoupper($this->httpMethod) === 'POST') ? $this->makeContentHash() : '',
             $auth_header
         );
 
@@ -617,8 +616,7 @@ class Authentication
      */
     protected function makeSigningKey()
     {
-        $key = self::makeBase64HmacSha256((string) ($this->timestamp), $this->auth['client_secret']);
-        return $key;
+        return $this->makeBase64HmacSha256((string)$this->timestamp, $this->auth['client_secret']);
     }
 
     /**
@@ -646,7 +644,7 @@ class Authentication
     {
         if ($path === null) {
             if (isset($_SERVER['HOME']) && file_exists($_SERVER['HOME'] . '/.edgerc')) {
-                $path = $_SERVER['HOME'] . "/.edgerc";
+                $path = $_SERVER['HOME'] . '/.edgerc';
             } elseif (file_exists('./.edgerc')) {
                 $path = './.edgerc';
             }
@@ -658,7 +656,7 @@ class Authentication
         }
 
         if (!is_readable($file)) {
-            throw new ConfigException("Unable to read .edgerc file!");
+            throw new ConfigException('Unable to read .edgerc file!');
         }
 
         // Handle : assignments in .edgerc files
