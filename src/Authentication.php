@@ -383,7 +383,7 @@ class Authentication
      * @param string $section
      * @param null $path
      * @return Authentication
-     * @throws ConfigException
+     * @throws \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
      */
     public static function createInstance($section = 'default', $path = null)
     {
@@ -417,7 +417,7 @@ class Authentication
      *
      * @param string $section
      * @return Authentication
-     * @throws ConfigException
+     * @throws \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
      */
     public static function createFromEnv($section = 'default')
     {
@@ -463,7 +463,7 @@ class Authentication
      * @param string|null $path
      *
      * @return Authentication
-     * @throws ConfigException
+     * @throws \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
      */
     public static function createFromEdgeRcFile($section = 'default', $path = null)
     {
@@ -638,7 +638,7 @@ class Authentication
      *
      * @param $path
      * @return array
-     * @throws ConfigException
+     * @throws \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
      */
     protected static function parseEdgeRcFile($path)
     {
