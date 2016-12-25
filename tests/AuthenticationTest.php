@@ -544,6 +544,9 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv('testing');
     }
 
+    /**
+     * @backupGlobals enabled
+     */
     public function testCreateInstancePreferEnv()
     {
         $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
@@ -593,6 +596,9 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
     }
 
+    /**
+     * @backupGlobals enabled
+     */
     public function testCreateInstanceSection()
     {
         $_ENV['AKAMAI_TESTING_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
@@ -619,6 +625,9 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
     }
 
+    /**
+     * @backupGlobals enabled
+     */
     public function testCreateInstanceSectionFallback()
     {
         $_ENV['AKAMAI_HOST'] = false;
@@ -648,6 +657,9 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
     }
 
+    /**
+     * @backupGlobals enabled
+     */
     public function testCreateInstanceSectionFallbackEnv()
     {
         $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
@@ -674,6 +686,9 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
     }
 
+    /**
+     * @backupGlobals enabled
+     */
     public function testCreateInstanceSectionFallbackInvalidEdgerc()
     {
         $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
@@ -720,7 +735,7 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 $e->getPrevious()
             );
 
-            $this->assertEquals("Section \"testing\" does not exist!", $e->getPrevious()->getMessage());
+            $this->assertEquals('Section "testing" does not exist!', $e->getPrevious()->getMessage());
 
             throw $e;
         }
@@ -729,20 +744,24 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
      * @expectedExceptionMessage Unable to create instance using environment or .edgerc file
+     * @backupGlobals enabled
      */
     public function testCreateInstanceInvalidEdgercInvalidEnv()
     {
         $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
 
         try {
-            $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance();
+            $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance(
+                "default",
+                __DIR__ . '/edgerc/.edgerc.testing'
+            );
         } catch (\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException $e) {
             $this->assertInstanceOf(
                 '\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException',
                 $e->getPrevious()
             );
 
-            $this->assertEquals('Path to .edgerc file "" does not exist!', $e->getPrevious()->getMessage());
+            $this->assertEquals('Section "default" does not exist!', $e->getPrevious()->getMessage());
 
             throw $e;
         }
@@ -751,13 +770,46 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
      * @expectedExceptionMessage Unable to create instance using environment or .edgerc file
+     * @backupGlobals enabled
      */
     public function testCreateInstanceInvalidEdgercInvalidEnvSection()
+    {
+        $_ENV['AKAMAI_TESTING_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
+
+        try {
+            $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance(
+                "testing",
+                __DIR__ . '/edgerc/.edgerc'
+            );
+        } catch (\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException $e) {
+            $this->assertInstanceOf(
+                '\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException',
+                $e->getPrevious()
+            );
+
+            $this->assertEquals(
+                'Section "testing" does not exist!',
+                $e->getPrevious()->getMessage()
+            );
+
+            throw $e;
+        }
+    }
+
+    /**
+     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
+     * @expectedExceptionMessage Unable to create instance using environment or .edgerc file
+     * @backupGlobals enabled
+     */
+    public function testCreateInstanceInvalidEdgercInvalidEnvSectionInvalidDefaultEnv()
     {
         $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
 
         try {
-            $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance('testing');
+            $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance(
+                "testing",
+                __DIR__ . '/edgerc/.edgerc'
+            );
         } catch (\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException $e) {
             $this->assertInstanceOf(
                 '\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException',
