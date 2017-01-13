@@ -1,3 +1,9 @@
+1.0.0beta1
+---
+[13 Jan, 2017]
+* Improved tests
+* Improved continuous integration, including Windows testing
+
 0.6.2
 ---
 [24 Dec, 2016]
