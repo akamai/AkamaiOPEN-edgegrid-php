@@ -13,7 +13,6 @@ namespace Akamai\Open\EdgeGrid\Tests\Client\Authentication;
 
 class TimestampTest extends \PHPUnit_Framework_TestCase
 {
-
     public function testTimestampFormat()
     {
         $timestamp = new \Akamai\Open\EdgeGrid\Authentication\Timestamp();
