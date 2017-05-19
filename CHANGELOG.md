@@ -1,3 +1,8 @@
+1.0.0
+---
+[19 May, 2017]
+* No changes from 1.0.0beta2
+
 1.0.0beta2
 ---
 [28 Apr, 2017]
