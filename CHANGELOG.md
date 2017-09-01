@@ -1,3 +1,8 @@
+1.0.1
+---
+[01 Sep, 2017]
+* Fixed an issue with handling trailing whitespace in credentials (see: #3)
+
 1.0.0
 ---
 [19 May, 2017]
