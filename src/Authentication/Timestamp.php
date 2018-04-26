@@ -48,7 +48,11 @@ class Timestamp
         $now = new \DateTime('now', new \DateTimeZone('UTC'));
         $timestamp = clone $this->timestamp;
 
-        return $timestamp->add(new \DateInterval($this->validFor)) >= $now;
+        try {
+            return $timestamp->add(new \DateInterval($this->validFor)) >= $now;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**
