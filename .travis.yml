@@ -46,6 +46,7 @@ matrix:
     # Currently running PHP 7.1
     - php: 5.3
       env: DEPS='lock'
+      dist: precise
     - php: 5.4
       env: DEPS='lock'
     - php: 5.5
