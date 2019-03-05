@@ -2,14 +2,14 @@ language: php
 services:
   - mysql
 php:
-  - 5.3
   - 5.4
   - 5.5
   - 5.6
   - 7.0
   - 7.1
+  - 7.2
+  - 7.3
   - nightly
-  - hhvm
 env:
   # composer install (uses lock file)
   #
@@ -17,14 +17,10 @@ env:
   # a sane dev environment.
   #
   # Everything below local dev PHP version _or_ platform req expected to fail
-  # HHVM expected to fail for some platform reqs
   - DEPS='lock'
   # composer update --prefer-lowest
   #
   # Ensures that the lowest possible versions will work
-  #
-  # HHVM may fail here if older versions required HHVM specific changes
-  # to be compatible
   - DEPS='low'
   # composer update
   #
@@ -38,15 +34,12 @@ env:
 matrix:
   fast_finish: true
   allow_failures:
-    # HHVM may fail in all configurations
-    - php: hhvm
     # PHP nightly may fail in all configuration
     - php: nightly
     # PHP < dev version may fail with composer.lock
     # Currently running PHP 7.1
     - php: 5.3
       env: DEPS='lock'
-      dist: precise
     - php: 5.4
       env: DEPS='lock'
     - php: 5.5
@@ -55,7 +48,27 @@ matrix:
       env: DEPS='lock'
     - php: 7.0
       env: DEPS='lock'
-    # Everything except HHVM/nightly should pass with high/low
+    - php: 7.1
+      env: DEPS='lock'
+    - php: 7.2
+      env: DEPS='lock'
+    - php: 7.2
+      env: DEPS='low'
+    - php: 7.3
+      env: DEPS='lock'
+    - php: 7.3
+      env: DEPS='low'
+    # Everything except nightly should pass with high/low
+  include:
+    - php: 5.3
+      dist: precise
+      env: DEPS='lock'
+    - php: 5.3
+      dist: precise
+      env: DEPS='low'
+    - php: 5.3
+      dist: precise
+      env: DEPS='high'
 
 sudo: false
 before_install:
@@ -67,7 +80,4 @@ install:
   - if [ "$DEPS" == "high" ];  then travis_retry composer update --no-interaction --prefer-source; fi;
   - composer show --tree
 script: php vendor/bin/phpunit
-after_script: if (( `php -r 'echo PHP_MAJOR_VERSION;'` == 7 )); then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover build/coverage/coverage.clover; fi;
-notifications:
-  slack:
-    secure: iICr/FzdFTh9qq+k3uUHuygnrE7hyJtsHNxkcHQeL1pFucgd5G+nruLqrP3gxBnOAt1hMPZ8kW7N/SK/l09VHDSqiQFEzPlUv/tkFH3cm4TSyVa9Z+2p/OgB5Z2qd1J24X5H+c1tj1fqnKgXuM5WyBVdwR5V2wyquqNlwQx7S+WpwXztoNg2DJghxOq8NOQ50R+2FroZ4YUzkBN3Fq8ksPl3yREY0/wuxUu72O0b+GWiectSVcBjCRchnovy3HssH+fjzHbowCVVKZalzOpD+sx5hYcATDKU5U7qHDKsUlB3mhwkRYeLEmFFPfTmPQ8znn0nSH2zR+DQXuZ7SqDdBFClCQdkaUtTkFzKW146GnryfTDl0eQFmaQPAUVkZTTAL9HPgJszbS50FvDVjsHqpMkhUaB5ZfvlaFobRrdob8HOFTJ9MOD+l0hzX9a/y7uPpeLAqoRH4OiprWPh8AFG069SKaiIzkRDD7l89TA7l3KSeR8rrGGp79tB6PwKjTzBhF9UN7Iw8rDgY6KCEolxFxyaYXi3HaMybKKSt+i86G/ZLFqIvZpp2bgz/D+jY/HuP92PL3rIoBUHDNRLq+YROC0sJ3emPCi2w/BPPZvk1co1g0fIjPrLoNygJr8M6AJjYJo9IcMZTgRSmk8BcyeVPkxLoPmrGIss29CqIb8U7+M=
+after_script: if (( `php -r 'echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION;'` == 73 )); then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover build/coverage/coverage.clover; fi;
