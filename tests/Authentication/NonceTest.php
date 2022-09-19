@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Akamai {OPEN} EdgeGrid Auth for PHP
  *
@@ -9,9 +10,10 @@
  * @link https://developer.akamai.com
  * @link https://developer.akamai.com/introduction/Client_Auth.html
  */
+
 namespace Akamai\Open\EdgeGrid\Tests\Client\Authentication;
 
-class NonceTest extends \PHPUnit_Framework_TestCase
+class NonceTest extends \PHPUnit\Framework\TestCase
 {
     public function testMakeNonce()
     {
@@ -32,6 +34,11 @@ class NonceTest extends \PHPUnit_Framework_TestCase
         }
 
         $nonce = new \Akamai\Open\EdgeGrid\Authentication\Nonce();
-        $this->assertAttributeEquals('random_bytes', 'function', $nonce);
+
+        $reflector = new \ReflectionClass($nonce);
+        $reflectedFunction = $reflector->getProperty('function');
+        $reflectedFunction->setAccessible(true);
+
+        $this->assertEquals('random_bytes', $reflectedFunction->getValue($nonce));
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Akamai {OPEN} EdgeGrid Auth for PHP
  *
@@ -9,10 +10,23 @@
  * @link https://developer.akamai.com
  * @link https://developer.akamai.com/introduction/Client_Auth.html
  */
+
 namespace Akamai\Open\EdgeGrid\Tests\Client;
 
-class AuthenticationTest extends \PHPUnit_Framework_TestCase
+class AuthenticationTest extends \PHPUnit\Framework\TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->prophet = new \Prophecy\Prophet();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->prophet->checkPredictions();
+        parent::tearDown();
+    }
+
     /**
      * @dataProvider createAuthHeaderDataProvider
      */
@@ -33,10 +47,10 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     ) {
         $this->setName($name);
 
-        $mockTimestamp = $this->prophesize('\Akamai\Open\EdgeGrid\Authentication\Timestamp');
+        $mockTimestamp = $this->prophet->prophesize('\Akamai\Open\EdgeGrid\Authentication\Timestamp');
         $mockTimestamp->__toString()->willReturn($timestamp);
         $mockTimestamp->isValid()->willReturn(true);
-        $mockNonce = $this->prophesize('\Akamai\Open\EdgeGrid\Authentication\Nonce');
+        $mockNonce = $this->prophet->prophesize('\Akamai\Open\EdgeGrid\Authentication\Nonce');
         $mockNonce->__toString()->willReturn($nonce);
 
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
@@ -57,11 +71,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testCreateAuthHeaderTrailingSpaces() {
-        $mockTimestamp = $this->prophesize('\Akamai\Open\EdgeGrid\Authentication\Timestamp');
+    public function testCreateAuthHeaderTrailingSpaces()
+    {
+        $mockTimestamp = $this->prophet->prophesize('\Akamai\Open\EdgeGrid\Authentication\Timestamp');
         $mockTimestamp->__toString()->willReturn("20170831T19:34:21+0000");
         $mockTimestamp->isValid()->willReturn(true);
-        $mockNonce = $this->prophesize('\Akamai\Open\EdgeGrid\Authentication\Nonce');
+        $mockNonce = $this->prophet->prophesize('\Akamai\Open\EdgeGrid\Authentication\Nonce');
         $mockNonce->__toString()->willReturn("nonce-xx-xxxx-xxxx-xxxx-xxxxxxxxxxxx");
 
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
@@ -101,9 +116,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->setHost('https://example.org');
         $authentication->createAuthHeader();
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAttr = $reflector->getProperty('timestamp');
+        $reflectedAttr->setAccessible(true);
+
         $this->assertInstanceOf(
             '\Akamai\Open\EdgeGrid\Authentication\Timestamp',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'timestamp')
+            $reflectedAttr->getValue($authentication)
         );
     }
 
@@ -117,18 +136,21 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $authentication->createAuthHeader();
         $authentication->setNonce();
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAttr = $reflector->getProperty('nonce');
+        $reflectedAttr->setAccessible(true);
+
         $this->assertInstanceOf(
             '\Akamai\Open\EdgeGrid\Authentication\Nonce',
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'nonce')
+            $reflectedAttr->getValue($authentication)
         );
     }
 
-    /**
-     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\SignerException\InvalidSignDataException
-     * @expectedExceptionMessage Timestamp is invalid. Too old?
-     */
     public function testTimestampTimeout()
     {
+        $this->expectException(\Akamai\Open\EdgeGrid\Authentication\Exception\SignerException\InvalidSignDataException::class);
+        $this->expectExceptionMessage('Timestamp is invalid. Too old?');
+
         $authentication = new \Akamai\Open\EdgeGrid\Authentication();
         $authentication->setAuth('test', 'test', 'test');
         $authentication->setHttpMethod('GET');
@@ -322,6 +344,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $_SERVER['HOME'] = __DIR__ . '/edgerc';
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile($section, $file);
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -329,21 +357,20 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
-    /**
-     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
-     * @expectedExceptionMessage Section "default" does not exist!
-     */
     public function testCreateFromEdgeRcUseCwd()
     {
+        $this->expectException(\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException::class);
+        $this->expectExceptionMessage('Section "default" does not exist!');
+
         $_SERVER['HOME'] = '/non-existant';
         $unlink = false;
         if (!file_exists('./.edgerc')) {
@@ -366,22 +393,22 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    /**
-     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
-     * @expectedExceptionMessage Path to .edgerc file "/non-existant/.edgerc" does not exist!
-     */
     public function testCreateFromEdgeRcNonExistant()
     {
+        $this->expectException(\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException::class);
+        $this->expectExceptionMessage('Path to .edgerc file "/non-existant/.edgerc" does not exist!');
+
         $auth = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile(null, '/non-existant/.edgerc');
     }
 
     /**
      * @requires OS ^(?!.*WIN).*$
-     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
-     * @expectedExceptionMessage Unable to read .edgerc file!
      */
     public function testCreateFromEdgeRcNonReadable()
     {
+        $this->expectException(\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException::class);
+        $this->expectExceptionMessage('Unable to read .edgerc file!');
+
         $filename = tempnam(sys_get_temp_dir(), '.');
         touch(tempnam(sys_get_temp_dir(), '.'));
         chmod($filename, 0000);
@@ -403,6 +430,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $file = __DIR__ . '/edgerc/.edgerc.invalid';
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile(null, $file);
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -410,13 +443,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
     public function testCreateFromEdgeRcColonsWithSpaces()
@@ -424,6 +457,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
         $file = __DIR__ . '/edgerc/.edgerc.invalid-spaces';
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile(null, $file);
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -431,13 +470,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
     /**
@@ -453,6 +492,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv();
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -460,13 +505,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
     /**
@@ -482,6 +527,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv();
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -489,13 +540,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
     /**
@@ -517,6 +568,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv('testing');
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -524,13 +581,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
     /**
@@ -545,6 +602,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv();
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -552,30 +615,28 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(131072, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(131072, $reflectedMaxBodySize->getValue($authentication));
     }
 
-    /**
-     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
-     * @expectedExceptionMessage Environment variables AKAMAI_HOST or AKAMAI_DEFAULT_HOST do not exist
-     */
     public function testCreateFromEnvInvalid()
     {
+        $this->expectException(\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException::class);
+        $this->expectExceptionMessage('Environment variables AKAMAI_HOST or AKAMAI_DEFAULT_HOST do not exist');
+
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv();
     }
 
-    /**
-     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
-     * @expectedExceptionMessage Environment variable AKAMAI_TESTING_HOST does not exist
-     */
     public function testCreateFromEnvInvalidSection()
     {
+        $this->expectException(\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException::class);
+        $this->expectExceptionMessage('Environment variable AKAMAI_TESTING_HOST does not exist');
+
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createFromEnv('testing');
     }
 
@@ -595,6 +656,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
             __DIR__ . '/edgerc/.edgerc.default-testing'
         );
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -602,19 +669,25 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
     public function testCreateInstanceFallbackEdgeRc()
     {
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance('default', __DIR__ . '/edgerc/.edgerc');
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -622,13 +695,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
     /**
@@ -644,6 +717,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance('testing', __DIR__ . '/edgerc/.edgerc');
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -651,13 +730,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
     /**
@@ -676,6 +755,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
             __DIR__ . '/edgerc/.edgerc.testing'
         );
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -683,13 +768,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
     /**
@@ -705,6 +790,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
 
         $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance('testing', __DIR__ . '/edgerc/.edgerc');
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -712,13 +803,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
     /**
@@ -737,6 +828,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
             __DIR__ . '/edgerc/.edgerc.invalid'
         );
 
+        $reflector = new \ReflectionClass($authentication);
+        $reflectedAuth = $reflector->getProperty('auth');
+        $reflectedMaxBodySize = $reflector->getProperty('max_body_size');
+        $reflectedAuth->setAccessible(true);
+        $reflectedMaxBodySize->setAccessible(true);
+
         $this->assertInstanceOf('\Akamai\Open\EdgeGrid\Authentication', $authentication);
         $this->assertEquals(
             array(
@@ -744,21 +841,20 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
                 'client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=',
                 'access_token' => 'akab-access-token-xxx-xxxxxxxxxxxxxxxx'
             ),
-            \PHPUnit_Framework_Assert::readAttribute($authentication, 'auth')
+            $reflectedAuth->getValue($authentication)
         );
         $this->assertEquals(
             'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net',
             $authentication->getHost()
         );
-        $this->assertEquals(2048, \PHPUnit_Framework_Assert::readAttribute($authentication, 'max_body_size'));
+        $this->assertEquals(2048, $reflectedMaxBodySize->getValue($authentication));
     }
 
-    /**
-     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
-     * @expectedExceptionMessage Unable to create instance using environment or .edgerc file
-     */
     public function testCreateInstanceSectionFallbackInvalidEdgercNoEnv()
     {
+        $this->expectException(\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException::class);
+        $this->expectExceptionMessage('Unable to create instance using environment or .edgerc file');
+
         try {
             $authentication = \Akamai\Open\EdgeGrid\Authentication::createInstance(
                 'testing',
@@ -777,12 +873,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
-     * @expectedExceptionMessage Unable to create instance using environment or .edgerc file
      * @backupGlobals enabled
      */
     public function testCreateInstanceInvalidEdgercInvalidEnv()
     {
+        $this->expectException(\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException::class);
+        $this->expectExceptionMessage('Unable to create instance using environment or .edgerc file');
+
         $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
 
         try {
@@ -803,12 +900,12 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
-     * @expectedExceptionMessage Unable to create instance using environment or .edgerc file
      * @backupGlobals enabled
      */
     public function testCreateInstanceInvalidEdgercInvalidEnvSection()
     {
+        $this->expectException(\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException::class);
+        $this->expectExceptionMessage('Unable to create instance using environment or .edgerc file');
         $_ENV['AKAMAI_TESTING_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
 
         try {
@@ -832,12 +929,13 @@ class AuthenticationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException
-     * @expectedExceptionMessage Unable to create instance using environment or .edgerc file
      * @backupGlobals enabled
      */
     public function testCreateInstanceInvalidEdgercInvalidEnvSectionInvalidDefaultEnv()
     {
+        $this->expectException(\Akamai\Open\EdgeGrid\Authentication\Exception\ConfigException::class);
+        $this->expectExceptionMessage('Unable to create instance using environment or .edgerc file');
+
         $_ENV['AKAMAI_HOST'] = 'akaa-baseurl-xxxxxxxxxxx-xxxxxxxxxxxxx.luna.akamaiapis.net';
 
         try {
