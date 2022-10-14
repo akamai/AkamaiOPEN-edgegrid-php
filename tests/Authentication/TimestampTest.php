@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Akamai {OPEN} EdgeGrid Auth for PHP
  *
@@ -9,9 +10,10 @@
  * @link https://developer.akamai.com
  * @link https://developer.akamai.com/introduction/Client_Auth.html
  */
+
 namespace Akamai\Open\EdgeGrid\Tests\Client\Authentication;
 
-class TimestampTest extends \PHPUnit_Framework_TestCase
+class TimestampTest extends \PHPUnit\Framework\TestCase
 {
     public function testTimestampFormat()
     {

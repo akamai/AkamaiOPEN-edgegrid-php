@@ -17,8 +17,8 @@ fi
 # Create the bootstrap file if necessary
 echo "<?php
 /* Generate the stub that will load the autoloader */
-if (!file_exists(__DIR__ . '/../build/phar')) {
-    mkdir(__DIR__ . '/../build/phar', 0775, true);
+if (!file_exists('./build/phar')) {
+    mkdir('./build/phar', 0775, true);
 }
 
 \$stub = <<<EOF
@@ -34,14 +34,16 @@ EOF;
 
 file_put_contents('build/phar/stub.php', \$stub);" > build/phar/bootstrap.php
 
+php build/phar/bootstrap.php
+
 if [[ -f $HOME/.composer/vendor/bin/box ]]
 then
     composer install --no-dev -o -q
-    php -dphar.readonly=0 $HOME/.composer/vendor/bin/box build
+    php -dphar.readonly=0 $HOME/.composer/vendor/bin/box compile
     composer install -q
 else
     composer install -o -q
-    php -dphar.readonly=0 ./vendor/bin/box build
+    php -dphar.readonly=0 ./vendor/bin/box compile
     composer install -q
 fi
 
@@ -49,7 +51,7 @@ mv akamai-open-edgegrid-auth.phar "akamai-open-edgegrid-auth${VERSION}.phar"
 
 echo "<?php
 include 'akamai-open-edgegrid-auth${VERSION}.phar';
-\$auth = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile();
+\$auth = \Akamai\Open\EdgeGrid\Authentication::createFromEdgeRcFile('default', './tests/edgerc/.edgerc');
 var_dump(\$auth);" > test.php
 echo "Running test.php";
 php test.php

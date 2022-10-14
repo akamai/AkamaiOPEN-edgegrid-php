@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Akamai {OPEN} EdgeGrid Auth for PHP
  *
@@ -9,6 +10,7 @@
  * @link https://developer.akamai.com
  * @link https://developer.akamai.com/introduction/Client_Auth.html
  */
+
 namespace Akamai\Open\EdgeGrid;
 
 use Akamai\Open\EdgeGrid\Authentication\Nonce;
@@ -393,8 +395,10 @@ class Authentication
     {
         $previousError = null;
 
-        if (isset($_ENV['AKAMAI_' .strtoupper($section). '_HOST'])
-            || (isset($_ENV['AKAMAI_HOST']) && $section === 'default')) {
+        if (
+            isset($_ENV['AKAMAI_' . strtoupper($section) . '_HOST'])
+            || (isset($_ENV['AKAMAI_HOST']) && $section === 'default')
+        ) {
             try {
                 return self::createFromEnv($section);
             } catch (ConfigException $previousError) {
@@ -680,11 +684,11 @@ class Authentication
     protected function buildQueryString($query)
     {
         if (defined('PHP_QUERY_RFC3986')) {
-            return http_build_query($query, null, '&', PHP_QUERY_RFC3986);
+            return http_build_query($query, '', '&', PHP_QUERY_RFC3986);
         }
 
         // @codeCoverageIgnoreStart
-        return str_replace('+', '%20', http_build_query($query, null, '&'));
+        return str_replace('+', '%20', http_build_query($query, '', '&'));
         // @codeCoverageIgnoreEnd
     }
 }

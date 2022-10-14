@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Akamai {OPEN} EdgeGrid Auth for PHP
  *
@@ -9,6 +10,7 @@
  * @link https://developer.akamai.com
  * @link https://developer.akamai.com/introduction/Client_Auth.html
  */
+
 namespace Akamai\Open\EdgeGrid\Authentication;
 
 /**
@@ -18,7 +20,7 @@ namespace Akamai\Open\EdgeGrid\Authentication;
  */
 class Timestamp
 {
-    const FORMAT = 'Ymd\TH:i:sO';
+    public const FORMAT = 'Ymd\TH:i:sO';
 
     /**
      * @var \DateTime Signing Timestamp
