@@ -2,7 +2,7 @@
 
 [Akamai EdgeGrid Authentication](https://techdocs.akamai.com/developer/docs/set-up-authentication-credentials) for PHP
 
-This library requires requires PHP 8+ and implements the Akamai EdgeGrid Authentication scheme for PHP.
+This library requires PHP 8+ and implements the Akamai EdgeGrid Authentication scheme for PHP.
 
 ## Install
 
