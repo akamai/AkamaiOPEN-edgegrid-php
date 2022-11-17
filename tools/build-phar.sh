@@ -13,16 +13,19 @@ cd $DIR && cd ../
 
 if [[ -f $HOME/.composer/vendor/bin/box ]]
 then
-    composer install --no-dev -o -q
-    php -dphar.readonly=0 $HOME/.composer/vendor/bin/box compile
-    composer install -q
+  composer install --no-dev -o -q
+  php -dphar.readonly=0 $HOME/.composer/vendor/bin/box compile
+  composer install -q
 else
-    composer install -o -q
-    php -dphar.readonly=0 ./vendor/bin/box compile
-    composer install -q
+  composer install -o -q
+  php -dphar.readonly=0 ./vendor/bin/box compile
+  composer install -q
 fi
 
-mv akamai-open-edgegrid-auth.phar "akamai-open-edgegrid-auth${VERSION}.phar"
+if [[ -n $VERSION ]]
+then
+  mv akamai-open-edgegrid-auth.phar "akamai-open-edgegrid-auth${VERSION}.phar"
+fi
 
-echo "Running test.php";
+echo "Running smoke test";
 php ./build/test.php
