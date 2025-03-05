@@ -1,3 +1,16 @@
+X.X.X
+---
+[X X, X]
+
+
+
+* Upgraded to symfony/process 6.4.15
+
+
+
+
+
+
 2.0.0
 ---
 [17 Oct, 2022]
