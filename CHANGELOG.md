@@ -1,7 +1,9 @@
 2.0.1
 ---
 [24 Mar, 2025]
-* Upgraded to symfony/process 6.4.15
+* Upgraded `symfony/process` to 6.4.15 to resolve vulnerabilities
+* Updated various dependencies
+* Added support for test coverage
 
 2.0.0
 ---
