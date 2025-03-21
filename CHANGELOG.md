@@ -1,15 +1,7 @@
-X.X.X
+2.0.1
 ---
-[X X, X]
-
-
-
+[24 Mar, 2025]
 * Upgraded to symfony/process 6.4.15
-
-
-
-
-
 
 2.0.0
 ---
