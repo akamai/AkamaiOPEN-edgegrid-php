@@ -1,0 +1,7 @@
+memory_limit=-1
+error_reporting=-1
+log_errors_max_len=0
+zend.assertions=1
+assert.exception=1
+xdebug.show_exception_trace=0
+zend_extension="/usr/local/Cellar/php/8.1.11/pecl/20210902/xdebug.so"

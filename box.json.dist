@@ -1,5 +1,4 @@
 {
-  "alias": "akamai-open-edgegrid-auth.phar",
   "algorithm": "SHA512",
   "directories": [
     "src",

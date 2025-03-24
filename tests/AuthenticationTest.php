@@ -15,6 +15,8 @@ namespace Akamai\Open\EdgeGrid\Tests\Client;
 
 class AuthenticationTest extends \PHPUnit\Framework\TestCase
 {
+    private \Prophecy\Prophet $prophet;
+    
     protected function setUp(): void
     {
         parent::setUp();
