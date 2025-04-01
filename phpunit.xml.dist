@@ -1,14 +1,4 @@
 <?xml version="1.0"?>
-<!--
-  ~ Akamai {OPEN} EdgeGrid Auth for PHP
-  ~
-  ~ @author Davey Shafik <dshafik@akamai.com>
-  ~ @copyright Copyright 2016 Akamai Technologies, Inc. All rights reserved.
-  ~ @license Apache 2.0
-  ~ @link https://github.com/akamai-open/edgegrid-auth-php
-  ~ @link https://developer.akamai.com
-  ~ @link https://developer.akamai.com/introduction/Client_Auth.html
-  -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" verbose="true" bootstrap="tests/bootstrap.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
   <coverage processUncoveredFiles="false">
     <include>

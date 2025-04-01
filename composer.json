@@ -1,16 +1,10 @@
 {
     "name": "akamai-open/edgegrid-auth",
-    "description": "Implements the Akamai {OPEN} EdgeGrid Authentication specified by https://developer.akamai.com/introduction/Client_Auth.html",
+    "description": "Implements the Akamai {OPEN} EdgeGrid Authentication specified by https://techdocs.akamai.com/developer/docs/set-up-authentication-credentials",
     "keywords": ["akamai", "open", "edgegrid", "authentication"],
     "type": "library",
     "license": "Apache-2.0",
     "homepage": "https://github.com/akamai-open/AkamaiOPEN-edgegrid-php",
-    "authors": [
-        {
-            "name": "Davey Shafik",
-            "email": "dshafik@akamai.com"
-        }
-    ],
     "require": {
         "php": ">=8.1"
     },
