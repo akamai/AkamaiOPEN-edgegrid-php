@@ -59,7 +59,7 @@ include 'akamai-open-edgegrid-auth.phar';
 
 You can obtain the authentication credentials through an API client. Requests to the API are marked with a timestamp and a signature and are executed immediately.
 
-1. [Create authentication credentials](https://techdocs.akamai.com/developer/docs/set-up-authentication-credentials).
+1. [Create authentication credentials](https://techdocs.akamai.com/developer/docs/edgegrid).
 
 2. Place your credentials in an EdgeGrid resource file `~/.edgerc`, in the `[default]` section.
 
@@ -124,7 +124,7 @@ $response = json_decode(file_get_contents('https://' . $auth->getHost() . $auth-
 
 ## License
 
-Copyright © 2025 Akamai Technologies, Inc. All rights reserved
+Copyright © 2026 Akamai Technologies, Inc. All rights reserved
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>.
 
