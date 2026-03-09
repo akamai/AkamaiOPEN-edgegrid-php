@@ -22,10 +22,10 @@ else
   composer install -q
 fi
 
+echo "Running smoke test";
+php ./build/test.php
+
 if [[ -n $VERSION ]]
 then
   mv akamai-open-edgegrid-auth.phar "akamai-open-edgegrid-auth${VERSION}.phar"
 fi
-
-echo "Running smoke test";
-php ./build/test.php

@@ -1,5 +1,11 @@
 # Release notes
 
+## 2.0.2 (10 Mar, 2026)
+
+* Dropped support for PHP `8.1`, the minimum supported version is now PHP `8.2`.
+* Upgraded `phpunit/phpunit` to `9.6.33` and `symfony/process` to `7.4.5` to resolve vulnerabilities.
+* Updated various dependencies.
+
 ## 2.0.1 (24 Mar, 2025)
 
 * Upgraded `symfony/process` to `6.4.15` to resolve vulnerabilities.
