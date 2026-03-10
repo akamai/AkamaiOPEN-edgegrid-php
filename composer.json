@@ -1,28 +1,22 @@
 {
     "name": "akamai-open/edgegrid-auth",
-    "description": "Implements the Akamai {OPEN} EdgeGrid Authentication specified by https://developer.akamai.com/introduction/Client_Auth.html",
+    "description": "Implements the Akamai {OPEN} EdgeGrid Authentication specified by https://techdocs.akamai.com/developer/docs/set-up-authentication-credentials",
     "keywords": ["akamai", "open", "edgegrid", "authentication"],
     "type": "library",
     "license": "Apache-2.0",
     "homepage": "https://github.com/akamai-open/AkamaiOPEN-edgegrid-php",
-    "authors": [
-        {
-            "name": "Davey Shafik",
-            "email": "dshafik@akamai.com"
-        }
-    ],
     "require": {
-        "php": ">=8.1"
+        "php": ">=8.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5",
+        "phpunit/phpunit": "^9.6.33",
         "phpspec/prophecy": "~1.0",
         "squizlabs/php_codesniffer": "^3.7",
         "friendsofphp/php-cs-fixer": "^3.9",
         "humbug/box": ">=4.3.8"
     },
     "suggest": {
-        "akamai-open/edgegrid-client": "Provide a fully featured HTTP client & CLI pre-configured with EdgeGrid authentication. (PHP 8.1+)"
+        "akamai-open/edgegrid-client": "Provide a fully featured HTTP client & CLI pre-configured with EdgeGrid authentication. (PHP 8.2+)"
     },
     "autoload": {
         "psr-4": {
@@ -36,7 +30,7 @@
     },
     "config": {
        "platform": {
-            "php": "8.1"
+            "php": "8.2"
        }
     },
     "scripts": {

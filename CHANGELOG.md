@@ -1,49 +1,48 @@
-2.0.1
----
-[24 Mar, 2025]
-* Upgraded `symfony/process` to 6.4.15 to resolve vulnerabilities
-* Updated various dependencies
-* Added support for test coverage
+# Release notes
 
-2.0.0
----
-[17 Oct, 2022]
-* Upgrade to php 8.1
+## 2.0.2 (10 Mar, 2026)
 
-1.0.1
----
-[01 Sep, 2017]
-* Fixed an issue with handling trailing whitespace in credentials (see: #3)
+* Dropped support for PHP `8.1`, the minimum supported version is now PHP `8.2`.
+* Upgraded `phpunit/phpunit` to `9.6.33` and `symfony/process` to `7.4.5` to resolve vulnerabilities.
+* Updated various dependencies.
 
-1.0.0
----
-[19 May, 2017]
-* No changes from 1.0.0beta2
+## 2.0.1 (24 Mar, 2025)
 
-1.0.0beta2
----
-[28 Apr, 2017]
-* Minor bug fix in test files
+* Upgraded `symfony/process` to `6.4.15` to resolve vulnerabilities.
+* Updated various dependencies.
+* Added support for test coverage.
 
-1.0.0beta1
----
-[13 Jan, 2017]
-* Improved tests
-* Improved continuous integration, including Windows testing
+## 2.0.0 (17 Oct, 2022)
 
-0.6.2
----
-[24 Dec, 2016]
-* Add support for using environment variables for credentials 
-* General cleanup
+* Upgraded to PHP `8.1`.
 
-0.6.1
----
-[17 Dec, 2016]
-* Fix PHP 7.1 compatibility (@remicollet)
+## 1.0.1 (01 Sep, 2017)
 
-0.6.0
----
-[08 Oct, 2016]
-* Initial release as a separate package
-* PHP 5.3 compatiblity fixes
+* Fixed an issue with handling trailing whitespace in credentials (#3).
+
+## 1.0.0 (19 May, 2017)
+
+* No changes from `1.0.0beta2`.
+
+## 1.0.0beta2 (28 Apr, 2017)
+
+* Fixed a minor bug in test files.
+
+## 1.0.0beta1 (13 Jan, 2017)
+
+* Improved tests.
+* Improved continuous integration, including Windows testing.
+
+## 0.6.2 (24 Dec, 2016)
+
+* Introduced the capability to use environment variables for configuring credentials.
+* General cleanup.
+
+## 0.6.1 (17 Dec, 2016)
+
+* Fixed compatibility issues with PHP `7.1` (@remicollet).
+
+## 0.6.0 (08 Oct, 2016)
+
+* Initial release as a separate package.
+* Fixed compatibility issues with PHP `5.3`.
