@@ -384,8 +384,8 @@ class Authentication
         $previousError = null;
 
         if (
-            isset($_ENV['AKAMAI_' . strtoupper($section) . '_HOST'])
-            || (isset($_ENV['AKAMAI_HOST']) && $section === 'default')
+            self::getEnvVar('AKAMAI_' . strtoupper($section) . '_HOST') !== false
+            || (self::getEnvVar('AKAMAI_HOST') !== false && $section === 'default')
         ) {
             try {
                 return self::createFromEnv($section);
@@ -397,7 +397,7 @@ class Authentication
             return self::createFromEdgeRcFile($section, $path);
         } catch (ConfigException $previousError) {
             try {
-                if (isset($_ENV['AKAMAI_HOST']) && $section !== 'default') {
+                if (self::getEnvVar('AKAMAI_HOST') !== false && $section !== 'default') {
                     return self::createFromEnv();
                 }
             } catch (ConfigException $previousError) {
@@ -419,12 +419,12 @@ class Authentication
     {
         $section = strtoupper($section);
 
-        $prefix = isset($_ENV['AKAMAI_' . $section . '_HOST']) ? 'AKAMAI_' . $section . '_' : 'AKAMAI_';
+        $prefix = self::getEnvVar('AKAMAI_' . $section . '_HOST') !== false ? 'AKAMAI_' . $section . '_' : 'AKAMAI_';
 
         $vars = array('HOST', 'CLIENT_TOKEN', 'CLIENT_SECRET', 'ACCESS_TOKEN');
 
         foreach ($vars as $var) {
-            if (!isset($_ENV[$prefix . $var])) {
+            if (self::getEnvVar($prefix . $var) === false) {
                 throw new ConfigException(sprintf(
                     'Environment variable%s %sAKAMAI_%s_%s do%s not exist',
                     $section === 'DEFAULT' ? 's' : '',
@@ -438,18 +438,39 @@ class Authentication
 
         $auth = new static();
         $auth->setAuth(
-            $_ENV[$prefix . 'CLIENT_TOKEN'],
-            $_ENV[$prefix . 'CLIENT_SECRET'],
-            $_ENV[$prefix . 'ACCESS_TOKEN']
+            self::getEnvVar($prefix . 'CLIENT_TOKEN'),
+            self::getEnvVar($prefix . 'CLIENT_SECRET'),
+            self::getEnvVar($prefix . 'ACCESS_TOKEN')
         );
 
-        $auth->setHost($_ENV[$prefix . 'HOST']);
+        $auth->setHost(self::getEnvVar($prefix . 'HOST'));
 
-        if (isset($_ENV[$prefix . 'MAX_SIZE'])) {
-            $auth->setMaxBodySize($_ENV[$prefix . 'MAX_SIZE']);
+        if (self::getEnvVar($prefix . 'MAX_SIZE') !== false) {
+            $auth->setMaxBodySize(self::getEnvVar($prefix . 'MAX_SIZE'));
         }
 
         return $auth;
+    }
+
+    /**
+     * Look up an environment variable via getenv() with $_ENV fallback.
+     * Empty strings are treated as unset.
+     *
+     * @param string $name
+     * @return string|false
+     */
+    private static function getEnvVar($name)
+    {
+        $value = getenv($name);
+        if ($value !== false && $value !== '') {
+            return $value;
+        }
+
+        if (isset($_ENV[$name]) && $_ENV[$name] !== '') {
+            return $_ENV[$name];
+        }
+
+        return false;
     }
 
     /**

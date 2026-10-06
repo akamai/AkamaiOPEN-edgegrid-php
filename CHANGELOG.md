@@ -1,5 +1,9 @@
 # Release notes
 
+## X.X.X (XX Month, XXXX)
+
+* Updated environment credential loading to use `getenv()` first, with a possible fallback to `$_ENV` ([I#12](https://github.com/akamai/AkamaiOPEN-edgegrid-php/issues/12)).
+
 ## 2.0.2 (10 Mar, 2026)
 
 * Dropped support for PHP `8.1`, the minimum supported version is now PHP `8.2`.
