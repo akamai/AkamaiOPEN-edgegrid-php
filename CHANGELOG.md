@@ -1,8 +1,9 @@
 # Release notes
 
-## X.X.X (XX Month, XXXX)
+## 2.0.3 (12 Oct, 2026)
 
 * Updated environment credential loading to use `getenv()` first, with a possible fallback to `$_ENV` ([I#12](https://github.com/akamai/AkamaiOPEN-edgegrid-php/issues/12)).
+* Updated various dependencies.
 
 ## 2.0.2 (10 Mar, 2026)
 
